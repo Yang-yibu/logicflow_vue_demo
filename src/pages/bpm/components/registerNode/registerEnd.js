@@ -26,19 +26,37 @@ export default function registerEnd(lf) {
           }),
         );
       }
+      getLabelShape() {
+        const attributes = this.getAttributes();
+        const { x, y } = attributes;
+        return h(
+          'text',
+          {
+            fill: '#EE2424',
+            fontSize: 14,
+            x: x,
+            y: y,
+            dy: 2,
+            'alignment-baseline': 'middle',
+            'text-anchor': 'middle',
+          },
+          '结束',
+        );
+      }
       getShape() {
         const attributes = this.getAttributes();
-        const { x, y, r, fill, stroke, strokeWidth } = attributes;
+        const { x, y, fill, strokeWidth } = attributes;
+
         return h('g', {}, [
           h('circle', {
             cx: x,
             cy: y,
-            r,
+            r: 22,
             fill,
-            stroke,
+            stroke: '#B3B3B3',
             strokeWidth,
           }),
-          this.getIconShape(),
+          this.getLabelShape(),
         ]);
       }
     }

@@ -1,18 +1,45 @@
 <template>
-  <div class="eng-node">
-    <span class="bpm-checkbox" @mousedown.stop="selectNode">
-      <el-checkbox :value="checked" />
+  <div class="eng-node" :style="{ border: conf.border, ...conf.font }">
+    <span
+      class="bpm-checkbox cus-checkbox"
+      :class="{ 'is-checked': checked }"
+      :style="{
+        color: conf.color,
+        background: checked ? conf.color : conf.color + '33',
+      }"
+      @mousedown.stop="selectNode"
+    >
+      <span class="cus-checkbox_inner"></span>
     </span>
-    <span>{{ label }}</span>
+    <span class="bpm-label">{{ label }}</span>
     <i class="bpm-info el-icon-finished"></i>
 
-    <el-tooltip
+    <el-popover
+      placement="top-start"
+      title="节点信息"
+      width="200"
+      trigger="hover"
+      content=""
+    >
+      <i
+        slot="reference"
+        class="bpm-more el-icon-warning-outline"
+        @mousedown.stop
+      ></i>
+
+      <div class="node-tip">
+        <div class="node-tip_li"><span>名称：</span>{{ label }}</div>
+        <div class="node-tip_li"><span>节点库：</span>节点库工作流程说明。{{ label }}</div>
+        <div class="node-tip_li"><span>本模板：</span>模板添加工作流程说明信息。{{ label }}</div>
+      </div>
+    </el-popover>
+    <!-- <el-tooltip
       effect="dark"
       content="Bottom Left 提示文字"
       placement="bottom-start"
     >
-      <i class="bpm-more el-icon-info" @mousedown.stop></i>
-    </el-tooltip>
+      <i class="bpm-more el-icon-warning-outline" @mousedown.stop></i>
+    </el-tooltip> -->
   </div>
 </template>
 
@@ -22,6 +49,7 @@ export default {
   props: {
     label: { type: String, default: '' },
     checked: { type: Boolean, default: false },
+    conf: { type: Object, default: () => ({}) },
   },
   data() {
     return {};
@@ -46,7 +74,7 @@ export default {
   display: flex;
   align-items: center;
   /* padding: 5px 10px; */
-  padding: 5px 35px;
+  padding: 5px 28px;
   width: 100%;
   height: 100%;
   border: 1px solid #ccc;
@@ -57,20 +85,69 @@ export default {
 
 .eng-node .bpm-checkbox {
   position: absolute;
-  left: 10px;
+  left: 8px;
 }
+.eng-node .bpm-label {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
 .eng-node .bpm-info {
   position: absolute;
-  right: 10px;
-  color: #52C41A;
+  right: 8px;
+  color: #52c41a;
 }
+
+.node-tip_li span {
+  display: inline-block;
+  width: 4em;
+}
+
+
 .eng-node .bpm-more {
   position: absolute;
-  bottom: 0;
+  bottom: -8px;
   right: 0;
-  padding: 5px;
-  font-size: 20px;
+  padding: 3px 5px;
+  font-size: 15px;
   transform: translate(105%, 5px);
   cursor: pointer;
+  color: #999;
+}
+
+.cus-checkbox {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  color: #3991e9;
+  border: 1px solid currentColor;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.cus-checkbox_inner {
+  display: block;
+  widows: 100%;
+  height: 100%;
+}
+
+.cus-checkbox.is-checked .cus-checkbox_inner::after {
+  transform: rotate(45deg) scaleY(1);
+}
+.cus-checkbox_inner::after {
+  box-sizing: content-box;
+  content: '';
+  border: 1px solid #fff;
+  border-left: 0;
+  border-top: 0;
+  height: 7px;
+  left: 4px;
+  position: absolute;
+  top: 1px;
+  transform: rotate(45deg) scaleY(0);
+  width: 3px;
+  transition: transform 0.15s ease-in 0.05s;
+  transform-origin: center;
 }
 </style>

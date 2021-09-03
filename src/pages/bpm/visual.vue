@@ -16,6 +16,7 @@ import * as registerNode from './components/registerNode';
 import Control from '@/components/LFComponents/Control.vue';
 
 import data from './data-init-graph';
+// import { Snapshot } from '@logicflow/extension';
 
 export default {
   name: 'BpmVisual',
@@ -31,6 +32,10 @@ export default {
           type: 'mesh',
           size: 10,
           visible: true,
+          config: {
+            color: '#ababab80', // 网格颜色
+            // thickness: 10, // 网格线宽度
+          },
         },
         keyboard: {
           enabled: true,
@@ -64,6 +69,9 @@ export default {
     };
   },
   mounted: function() {
+    // 导出包含有 HTML 元素有问题
+    // LogicFlow.use(Snapshot);
+
     const lf = new LogicFlow({
       ...this.config,
       container: document.querySelector('#bpm-ins'),

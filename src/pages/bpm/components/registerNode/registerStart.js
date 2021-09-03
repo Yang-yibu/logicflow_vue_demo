@@ -8,31 +8,36 @@ export default function registerStart(lf) {
           'text',
           {
             fill: '#52C41A',
-            fontSize: 12,
-            x: x - 12,
-            y: y + 4,
-            width: 50,
-            height: 25,
+            fontSize: 14,
+            x: x,
+            y: y,
+            dy: 2,
+            'alignment-baseline': 'middle',
+            'text-anchor': 'middle',
           },
           '开始',
         );
       }
       getShape() {
         const attributes = this.getAttributes();
-        const { x, y, r, fill, stroke, strokeWidth } = attributes;
-        return h('g', {
-          className: 'cus-start'
-        }, [
-          h('circle', {
-            cx: x,
-            cy: y,
-            r,
-            fill,
-            stroke,
-            strokeWidth,
-          }),
-          this.getLabelShape(),
-        ]);
+        const { x, y, fill, strokeWidth } = attributes;
+        return h(
+          'g',
+          {
+            className: 'cus-start',
+          },
+          [
+            h('circle', {
+              cx: x,
+              cy: y,
+              r: 22,
+              fill,
+              stroke: '#B3B3B3',
+              strokeWidth,
+            }),
+            this.getLabelShape(),
+          ],
+        );
       }
     }
     class NodeModel extends CircleNodeModel {
