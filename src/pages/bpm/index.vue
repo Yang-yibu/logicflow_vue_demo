@@ -72,73 +72,77 @@ export default {
 };
 </script>
 
-<style>
+<style lang="less">
 .bpm {
   width: 100%;
   height: 100%;
   background: #f2f2f2;
-
   display: flex;
-}
-.bpm .tree-node {
-  display: flex;
-  align-items: center;
-  padding: 0 4px;
-  width: 100%;
-  height: 20px;
-  cursor: pointer;
-  user-select: none;
-  border: 1px solid #dbdbdb;
-  border-radius: 4px;
-  background: #f2f2f2;
-}
-.bpm .tree-node .colorBlock {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 2px;
-  margin-right: 5px;
-  background: #dbdbdb;
-}
 
-.bpm-nodes {
-  padding: 10px;
-  flex: none;
-  width: 350px;
-  border-right: 1px solid #ddd;
-  background: #fff;
-  overflow: auto;
-}
+  .tree-node {
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    width: 100%;
+    height: 20px;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid #dbdbdb;
+    border-radius: 4px;
+    background: #f2f2f2;
 
-.bpm-content {
-  /* padding: 10px; */
-  width: 100px;
-  flex: 1;
-}
+    .colorBlock {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+      margin-right: 5px;
+      background: #dbdbdb;
+    }
+  }
 
-.cus-tree .el-tree-node__expand-icon {
-  box-sizing: border-box;
-  padding: 2px 6px 2px 2px !important;
-  color: #4d4d4d;
-  font-size: 12px;
-  transform: none !important;
-}
+  .bpm-nodes {
+    padding: 10px;
+    flex: none;
+    width: 350px;
+    border-right: 1px solid #ddd;
+    background: #fff;
+    overflow: auto;
+  }
 
-.cus-tree .el-tree-node__expand-icon:not(.is-leaf)::before {
-  border-color: #4d4d4d !important;
-}
-.cus-tree .el-tree-node__expand-icon.el-icon-caret-right::before {
-  display: inline-block;
-  border: 1px solid transparent;
-  text-align: center;
-  padding: 1px;
-  width: 16px;
-  height: 16px;
-  line-height: 16px;
-  content: '\e6d9';
-}
-.cus-tree .el-tree-node__expand-icon.el-icon-caret-right.expanded::before {
-  content: '\e6d8';
+  .bpm-content {
+    /* padding: 10px; */
+    width: 100px;
+    flex: 1;
+  }
+
+  .cus-tree {
+    .el-tree-node__expand-icon {
+      box-sizing: border-box;
+      padding: 2px 6px 2px 2px !important;
+      font-size: 12px;
+      transform: none !important;
+    }
+
+    .el-tree-node__expand-icon:not(.is-leaf)::before {
+      border-color: #4d4d4d !important;
+      color: #4d4d4d;
+    }
+
+    .el-tree-node__expand-icon.el-icon-caret-right::before {
+      display: inline-block;
+      border: 1px solid transparent;
+      text-align: center;
+      padding: 1px;
+      width: 16px;
+      height: 16px;
+      line-height: 16px;
+      content: '\e6d9';
+    }
+    .el-tree-node__expand-icon.el-icon-caret-right.expanded::before {
+      content: '\e6d8';
+    }
+  }
 }
 </style>
 
