@@ -48,6 +48,16 @@ export default {
       this.checked = !this.checked;
     },
     dragTreeNode: function(node) {
+      let curNode = { children: this.bpmData };
+      node.chainLabel = [];
+      node.pos.map((item, index) => {
+        if (index < node.pos.length - 1) {
+          curNode = curNode.children[item];
+          node.chainLabel.push(curNode.label);
+        }
+      });
+      node.chainLabel = node.chainLabel.join(' -> ');
+
       this.$refs['bpmVisual'].lf.dnd.startDrag({
         type: 'EngNode_' + (node.pos.length || 1),
         id: 'cus_' + node.id,
@@ -239,11 +249,13 @@ export default {
   background-color: transparent;
 }
 
-.cus-tree.tree-show-scroll-bar .el-tree-node__content:hover {
+.cus-tree.tree-show-scroll-bar .el-tree-node__content:hover,
+.cus-tree.tree-show-scroll-bar .el-tree-node__content:focus {
   background: transparent;
 }
 
-.cus-tree.tree-show-scroll-bar .el-tree-node__content:hover .cus-tree-node {
+.cus-tree.tree-show-scroll-bar .el-tree-node__content:hover .cus-tree-node,
+.cus-tree.tree-show-scroll-bar .el-tree-node__content:focus .cus-tree-node {
   background-color: #f5f7fa;
 }
 

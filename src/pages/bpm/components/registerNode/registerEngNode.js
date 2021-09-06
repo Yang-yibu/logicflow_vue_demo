@@ -46,16 +46,17 @@ function EngNode_view(HtmlNode, type) {
         label: prop.label,
         // checked: checkedNode.indexOf(prop.node.id) > -1,
         checked: this.checked,
+        chainLabel: prop.chainLabel,
       };
     }
     setHtml(rootEl) {
       const that = this;
       // console.log('set', this);
+      const attr = this.getAttributes();
+      const { properties } = attr;
       if (!this.showUpdate()) return;
       // console.log('setRender');
 
-      const attr = this.getAttributes();
-      const { properties } = attr;
       const newProp = this.renderProp(properties);
 
       const el = document.createElement('div');
@@ -76,6 +77,14 @@ function EngNode_view(HtmlNode, type) {
               label: newProp.label || attr.text.value,
               checked: newProp.checked,
               conf: conf,
+              tipShowFn: () => {
+                let p = that.getProperties() || {};
+                return {
+                  chainLabel: p.node.chainLabel,
+                  node_bz: '节点库说明信息',
+                  tpl_node_bz: '模板节点备注信息',
+                };
+              },
             },
             on: {
               'change-checkbox': ev => {
@@ -95,9 +104,13 @@ function EngNode_model(HtmlNodeModel, type) {
   let conf = TypeMap[type];
   return class NodeModel extends HtmlNodeModel {
     constructor(data, graphModel) {
+      console.log(data);
       super(data, graphModel);
+      console.log(data);
     }
     setAttributes() {
+      const { properties } = this;
+      console.log(properties);
       const width = conf.width;
       const height = conf.height;
 

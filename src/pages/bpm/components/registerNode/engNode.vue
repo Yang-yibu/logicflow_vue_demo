@@ -18,8 +18,9 @@
       placement="top-start"
       title="节点信息"
       width="200"
-      trigger="hover"
+      trigger="click"
       content=""
+      @show="tipShow"
     >
       <i
         slot="reference"
@@ -28,9 +29,22 @@
       ></i>
 
       <div class="node-tip">
-        <div class="node-tip_li"><span>名称：</span>{{ label }}</div>
-        <div class="node-tip_li"><span>节点库：</span>节点库工作流程说明。{{ label }}</div>
-        <div class="node-tip_li"><span>本模板：</span>模板添加工作流程说明信息。{{ label }}</div>
+        <div class="node-tip_li">
+          <span class="node-tip_label">名称</span>
+          <span>{{ label }}</span>
+        </div>
+        <div class="node-tip_li">
+          <span class="node-tip_label">父节点</span
+          ><span>{{ tipData.chainLabel }}</span>
+        </div>
+        <div class="node-tip_li">
+          <span class="node-tip_label">节点库</span
+          ><span>{{ tipData.node_bz }}</span>
+        </div>
+        <div class="node-tip_li">
+          <span class="node-tip_label">本模板</span
+          ><span>{{ tipData.tpl_node_bz }}</span>
+        </div>
       </div>
     </el-popover>
     <!-- <el-tooltip
@@ -50,19 +64,26 @@ export default {
     label: { type: String, default: '' },
     checked: { type: Boolean, default: false },
     conf: { type: Object, default: () => ({}) },
+    tipShowFn: { type: Function },
   },
   data() {
-    return {};
+    return {
+      tipData: {},
+    };
   },
   mounted: function() {
     // 会频繁触发
     // eslint-disable-next-line no-debugger
     // debugger
-    // console.log('engNode-mounted');
+    // console.log('engNode-mounted', this);
   },
   methods: {
     selectNode: function() {
       this.$emit('change-checkbox', !this.checked);
+    },
+    tipShow: function() {
+      // this.$emit('tip-show')
+      this.tipData = this.tipShowFn() || {};
     },
   },
 };
@@ -99,11 +120,18 @@ export default {
   color: #52c41a;
 }
 
-.node-tip_li span {
-  display: inline-block;
-  width: 4em;
+.node-tip_li {
+  display: flex;
 }
-
+.node-tip_li .node-tip_label {
+  flex: none;
+  width: 4em;
+  text-align-last: justify;
+}
+.node-tip_li .node-tip_label::after {
+  display: inline-block;
+  content: '：';
+}
 
 .eng-node .bpm-more {
   position: absolute;
