@@ -11,8 +11,16 @@
         @mousewheel="zoomHandler"
       >
         <g :transform="transformStyle.transform">
-          <foreignObject width="100%" height="100%">
-            自定义文件
+          <foreignObject :width="nodesBox.width" :height="nodesBox.height">
+            <div style="width: 100%; height: 100%;">
+              <div id="nodes" class="bpm-node-box">
+                <eng-node v-for="l1 in bpmData" :key="l1.id" v-bind="l1.prop" class="level-1">
+                  <eng-node v-for="l2 in l1.children" :key="l2.id" v-bind="l2.prop" class="level-2">
+                    <eng-node v-for="l3 in l2.children" :key="l3.id" v-bind="l3.prop" class="level-3"></eng-node>
+                  </eng-node>
+                </eng-node>
+              </div>
+            </div>
           </foreignObject>
         </g>
       </svg>
@@ -21,11 +29,16 @@
 </template>
 
 <script>
-import TransformModel from './transformModel';
-import { StepDrag } from './drag';
+import TransformModel from './components/transformModel';
+import { StepDrag } from './components/drag';
+import EngNode from './components/engNode.vue';
+import { treeNodeAddProp } from '@/Util';
+import dataTree from './data-tree';
 
+/** 流程图区域 */
 export default {
   name: 'BpmVisual',
+  components: { EngNode },
   data: function() {
     return {
       gridSize: 1,
@@ -40,6 +53,37 @@ export default {
       /** TransformModel */
       transformMatrix: new TransformModel(),
       // stepDrag: new StepDrag(),
+      nodesBox: { width: '100%', height: '100%' },
+      bpmData: [],
+      // bpmData: [
+      //   { id: 1, label: '开始', type: 'level_1' },
+      //   {
+      //     id: 2,
+      //     label: '机柜安装',
+      //     type: 'level_1',
+      //     children: [
+      //       {
+      //         id: '2-1',
+      //         label: '机柜线路整理',
+      //         type: 'level_2',
+      //         children: [
+      //           { id: '2-1-1', label: '安装-1', type: 'level_3' },
+      //           { id: '2-1-2', label: '安装-2', type: 'level_3' },
+      //           { id: '2-1-3', label: '安装-3', type: 'level_3' },
+      //         ],
+      //       },
+      //       { id: '2-2', label: '机柜设备上架', type: 'level_2' },
+      //       { id: '2-3', label: '机柜线路测试', type: 'level_2' },
+      //     ],
+      //   },
+      //   {
+      //     id: 3,
+      //     label: '设备调试',
+      //     type: 'level_1',
+      //     children: [{ id: '3-1', label: '设备调试', type: 'level_2' }],
+      //   },
+      //   { id: 4, label: '结束', type: 'level_1' },
+      // ],
     };
   },
   computed: {
@@ -61,6 +105,22 @@ export default {
       onDragging: this.onDragging,
       onDragEnd: this.onDragEnd,
       step: this.gridSize,
+    });
+
+    this.bpmData = treeNodeAddProp(dataTree, { childrenProp: 'children', initPos: [] }, (node, pos) => {
+      let newNode = {
+        id: node.id,
+        label: node.label,
+        pos: pos,
+        type: 'level_' + pos.length,
+        className: 'level_' + pos.length,
+      };
+      node.prop = newNode;
+      return node;
+    });
+    this.$nextTick(() => {
+      let nodeBox = document.getElementById('nodes').getBoundingClientRect();
+      this.nodesBox = { width: nodeBox.width + 40, height: nodeBox.height + 60 };
     });
   },
 
@@ -126,7 +186,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="less">
 .bpm-container {
   position: relative;
 }
@@ -137,5 +197,82 @@ export default {
 
 .bpm-visual .dragging {
   cursor: grabbing;
+}
+
+.bpm-node-box {
+  display: flex;
+  padding: 20px 30px;
+
+  & .level-node {
+    position: relative;
+    &::before {
+      content: '';
+      border-bottom: 1px solid #999;
+      position: absolute;
+    }
+    &.level-2,
+    &.level-3 {
+      & > .line {
+        position: absolute;
+        border-left: 1px solid #999;
+      }
+      // 有 children 包裹是 1，没有是 3
+      &:nth-child(1) > .line {
+        border-top: 1px solid #999;
+      }
+    }
+
+    &.level-1 {
+      margin: 0 30px;
+
+      &::before {
+        width: 70%;
+        left: 100%;
+        top: 13px;
+      }
+      &:last-child::before {
+        display: none;
+      }
+    }
+    &.level-2 {
+      margin-top: 30px;
+
+      & > .line {
+        width: 25px;
+        height: calc(100% + 30px);
+        top: -42px;
+        left: -25px;
+      }
+
+      &::before {
+        width: 25px;
+        right: 100%;
+        top: 6px;
+      }
+      &:last-child > .line {
+        height: 48px;
+      }
+    }
+    &.level-3 {
+      margin-top: 10px;
+      margin-left: 20px;
+
+      & > .line {
+        width: 15px;
+        height: calc(100% + 10px);
+        left: -35px;
+        top: -15px;
+      }
+
+      &::before {
+        width: 35px;
+        right: 100%;
+        top: 14px;
+      }
+      &:last-child > .line {
+        height: 31px;
+      }
+    }
+  }
 }
 </style>

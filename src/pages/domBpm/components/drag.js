@@ -5,6 +5,7 @@ const LEFT_MOUSE_BUTTON_CODE = 0;
 /**
  * 拖拽的时候，按照指定step进行
  * - 因为在绘制的过程中因为放大缩小，移动的真实的step则是变化的。
+ * @class
  */
 export class StepDrag {
   onDragStart = null;
@@ -20,6 +21,7 @@ export class StepDrag {
   /** 是否为拖拽 */
   isDrag = false;
 
+  /** @constructor */
   constructor({
     onDragStart = noop,
     onDragging = noop,
@@ -41,7 +43,10 @@ export class StepDrag {
       model,
     });
   }
-  /** @param {number} step */
+  /**
+   * @param {number} step
+   * @property
+   */
   setStep(step) {
     this.step = step;
   }
