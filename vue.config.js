@@ -8,7 +8,10 @@ module.exports = {
       errors: false,
     },
   },
+  publicPath: '/logic-flow/',
   configureWebpack: {
+    // webpackConfig.name
+    // name: 'logicFlow',
     devtool: 'source-map',
   },
 };
