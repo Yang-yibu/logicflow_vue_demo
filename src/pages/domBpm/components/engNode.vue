@@ -94,7 +94,7 @@ export default {
   },
   computed: {
     conf: function() {
-      return this.TypeMap[this.type] || {};
+      return this.TypeMap[this.type] || this.TypeMap['level_1'];
     },
   },
   mounted: function() {
@@ -109,7 +109,7 @@ export default {
     },
     tipShow: function() {
       // this.$emit('tip-show')
-      this.tipData = this.tipShowFn() || {};
+      // this.tipData = this.tipShowFn() || {};
     },
   },
 };

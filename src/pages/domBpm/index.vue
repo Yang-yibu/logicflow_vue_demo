@@ -2,28 +2,33 @@
   <div class="bpm">
     <div class="bpm-nodes">
       <el-tree
+        id="jsDragSource"
         class="cus-tree tree-show-line1 tree-show-scroll-bar"
         :data="bpmData"
         :props="defaultProps"
       >
         <template #default="{  data }">
-          <div class="tree-node" @mousedown.stop="dragTreeNode(data)">
-            <span
-              class="colorBlock"
-              :style="{ background: colorArr[data.pos.length - 1] }"
-            ></span>
-            <span>{{ data.label }}</span>
+          <div
+            class="tree-node"
+            :id="'source_' + data.id"
+            @mouseover="mouseoverHandle(data)"
+            @mouseout="mouseoutHandle(data)"
+          >
+            <span class="colorBlock" :style="{ background: colorArr[data.pos.length - 1] }"></span>
+            <span style="flex: 1;">{{ data.label }}</span>
           </div>
         </template>
       </el-tree>
     </div>
-    <bpm-visual ref="bpmVisual" class="bpm-content"></bpm-visual>
+    <bpm-visual ref="bpmVisual" class="bpm-content" :bpmData="bpmData"></bpm-visual>
   </div>
 </template>
 
 <script>
 import BpmVisual from './visual.vue';
 import treeData from '../bpm/data-tree';
+import { treeNodeAddProp } from '@/Util';
+import Sortable from 'sortablejs';
 
 export default {
   name: 'DOMBpmEditor',
@@ -37,31 +42,183 @@ export default {
       },
       checked: false,
       bpmData: [],
+      fakerNode: null,
     };
   },
   mounted: function() {
-    this.bpmData = treeData;
+    let tree = treeData;
+    tree = [
+      {
+        id: 2,
+        pid: -1,
+        label: '机柜安装',
+        type: 'level_1',
+        children: [
+          {
+            id: '2-1',
+            label: '机柜线路整理',
+            type: 'level_2',
+            pid: 2,
+            children: [
+              { id: '2-1-1', pid: '2-1', label: '安装-1', type: 'level_3' },
+              { id: '2-1-2', pid: '2-1', label: '安装-2', type: 'level_3' },
+              { id: '2-1-3', pid: '2-1', label: '安装-3', type: 'level_3' },
+            ],
+          },
+          { id: '2-2', pid: 2, label: '机柜设备上架', type: 'level_2' },
+          { id: '2-3', pid: 2, label: '机柜线路测试', type: 'level_2' },
+        ],
+      },
+      {
+        id: 3,
+        pid: -1,
+        label: '设备调试',
+        type: 'level_1',
+        children: [{ id: '3-1', pid: 3, label: '设备调试', type: 'level_2' }],
+      },
+    ];
+
+    this.bpmData = treeNodeAddProp(tree, { childrenProp: 'children', initPos: [] }, (node, pos) => {
+      let newNode = {
+        id: 'node_' + node.id,
+        s_id: node.id,
+        pid: node.pid,
+        label: node.label,
+        pos: pos,
+        type: 'level_' + pos.length,
+        className: 'level_' + pos.length,
+      };
+      node.pos = pos;
+      node.prop = newNode;
+
+      return node;
+    });
   },
   methods: {
     handleCheckbox: function() {
       this.checked = !this.checked;
     },
-    dragTreeNode: function(node) {
-      let curNode = { children: this.bpmData };
-      node.chainLabel = [];
-      node.pos.map((item, index) => {
-        if (index < node.pos.length - 1) {
-          curNode = curNode.children[item];
-          node.chainLabel.push(curNode.label);
-        }
+
+    mouseoutHandle: function(node) {
+      let fakerNode = node.prop;
+      let sourceDom = document.getElementById('source_' + fakerNode.s_id);
+      let targetDom;
+      if (node.pid == -1) {
+        targetDom = document.getElementById('nodes');
+      } else {
+        // .level-node-children
+        targetDom = document.getElementById('node_' + node.id).parentElement;
+      }
+      console.log('destroy')
+      sourceDom.sourceIns.destroy();
+      sourceDom.removeAttribute('data-drap');
+      sourceDom.sourceIns = null;
+      targetDom.targetIns.destroy();
+      targetDom.removeAttribute('data-drap');
+      targetDom.targetIns = null;
+    },
+    mouseoverHandle: function(node) {
+      let fakerNode = node.prop;
+      let sourceDom = document.getElementById('source_' + fakerNode.s_id);
+      sourceDom.sourceIns = new Sortable(sourceDom, {
+        group: {
+          name: 'shared',
+          pull: 'clone',
+          put: false,
+        },
+        // draggable: '.tree-node',
+        animation: 150,
+        sort: false,
+        onEnd: function(/**Event*/ evt) {
+          let copyEl = evt.item;
+          let prevEl = copyEl.previousElementSibling;
+          console.log('mouseoverHandle: ', copyEl, prevEl);
+
+          // evt.newIndex;
+          console.log(evt.newIndex);
+        },
       });
-      node.chainLabel = node.chainLabel.join(' -> ');
+      sourceDom.setAttribute('data-drap', 1);
+
+      let targetDom;
+      if (node.pid == -1) {
+        targetDom = document.getElementById('nodes');
+      } else {
+        // targetDom = document.getElementById('node_' + node.pid).getElementsByClassName('level-node-children');
+        // .level-node-children
+        targetDom = document.getElementById('node_' + node.id).parentElement;
+      }
+      targetDom.targetIns = new Sortable(targetDom, {
+        group: 'shared',
+        animation: 150,
+      });
+      targetDom.setAttribute('data-drap', 1);
+    },
+
+    dragTreeNode: function(node) {
+      let fakerNode = node.prop;
+      this.fakerNode = fakerNode;
+
+      this.$nextTick(() => {
+        this.sourceIns = new Sortable(document.getElementById('source_' + fakerNode.s_id), {
+          group: {
+            name: 'shared',
+            pull: 'clone',
+            put: false,
+          },
+          // draggable: '.tree-node',
+          animation: 150,
+          sort: false,
+          onEnd: function(/**Event*/ evt) {
+            let copyEl = evt.item;
+            let prevEl = copyEl.previousElementSibling;
+            console.log('dragTreeNode:', copyEl, prevEl);
+
+            // evt.newIndex;
+            console.log(evt.newIndex);
+          },
+        });
+
+        let targetDom;
+        if (node.pid == -1) {
+          targetDom = document.getElementById('nodes');
+        } else {
+          // targetDom = document.getElementById('node_' + node.pid).getElementsByClassName('level-node-children');
+          targetDom = document.getElementById('node_' + node.id).parentElement;
+        }
+        this.targetIns = new Sortable(targetDom, {
+          group: {
+            name: 'shared',
+            pull: 'clone',
+          },
+          animation: 150,
+        });
+      });
+
+      // let curNode = { children: this.bpmData };
+      // node.chainLabel = [];
+      // node.pos.map((item, index) => {
+      //   if (index < node.pos.length - 1) {
+      //     curNode = curNode.children[item];
+      //     node.chainLabel.push(curNode.label);
+      //   }
+      // });
+      // node.chainLabel = node.chainLabel.join(' -> ');
     },
   },
 };
 </script>
 
 <style lang="less">
+.tree-node {
+  position: relative;
+}
+#dropFakerNode {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .bpm {
   width: 100%;
   height: 100%;
@@ -179,10 +336,7 @@ export default {
   padding-left: 24px;
 }
 
-.cus-tree.tree-show-line
-  .el-tree-node
-  .el-tree-node__children
-  .el-tree-node__content {
+.cus-tree.tree-show-line .el-tree-node .el-tree-node__children .el-tree-node__content {
   padding-left: 0 !important;
 }
 
@@ -228,9 +382,7 @@ export default {
   left: 0;
 }
 
-.cus-tree.tree-show-scroll-bar.el-tree--highlight-current
-  .el-tree-node.is-current
-  > .el-tree-node__content {
+.cus-tree.tree-show-scroll-bar.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
   background: transparent;
 }
 

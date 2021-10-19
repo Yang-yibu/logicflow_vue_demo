@@ -7,18 +7,20 @@
         height="100%"
         name="canvas-overlay"
         :class="{ dragging: isDragging }"
-        @mousedown="mouseDownHandler"
-        @mousewheel="zoomHandler"
+        @mousedown.stop="mouseDownHandler"
+        @mousewheel.stop="zoomHandler"
       >
         <g :transform="transformStyle.transform">
           <foreignObject :width="nodesBox.width" :height="nodesBox.height">
             <div style="width: 100%; height: 100%;">
               <div id="nodes" class="bpm-node-box">
+                <eng-node type="type_start" class="level-1" label="开始"></eng-node>
                 <eng-node v-for="l1 in bpmData" :key="l1.id" v-bind="l1.prop" class="level-1">
                   <eng-node v-for="l2 in l1.children" :key="l2.id" v-bind="l2.prop" class="level-2">
                     <eng-node v-for="l3 in l2.children" :key="l3.id" v-bind="l3.prop" class="level-3"></eng-node>
                   </eng-node>
                 </eng-node>
+                <eng-node type="type_end" class="level-1" label="结束"></eng-node>
               </div>
             </div>
           </foreignObject>
@@ -32,13 +34,14 @@
 import TransformModel from './components/transformModel';
 import { StepDrag } from './components/drag';
 import EngNode from './components/engNode.vue';
-import { treeNodeAddProp } from '@/Util';
-import dataTree from './data-tree';
 
 /** 流程图区域 */
 export default {
   name: 'BpmVisual',
   components: { EngNode },
+  props: {
+    bpmData: { type: Array, default: () => [] },
+  },
   data: function() {
     return {
       gridSize: 1,
@@ -53,37 +56,8 @@ export default {
       /** TransformModel */
       transformMatrix: new TransformModel(),
       // stepDrag: new StepDrag(),
-      nodesBox: { width: '100%', height: '100%' },
-      bpmData: [],
-      // bpmData: [
-      //   { id: 1, label: '开始', type: 'level_1' },
-      //   {
-      //     id: 2,
-      //     label: '机柜安装',
-      //     type: 'level_1',
-      //     children: [
-      //       {
-      //         id: '2-1',
-      //         label: '机柜线路整理',
-      //         type: 'level_2',
-      //         children: [
-      //           { id: '2-1-1', label: '安装-1', type: 'level_3' },
-      //           { id: '2-1-2', label: '安装-2', type: 'level_3' },
-      //           { id: '2-1-3', label: '安装-3', type: 'level_3' },
-      //         ],
-      //       },
-      //       { id: '2-2', label: '机柜设备上架', type: 'level_2' },
-      //       { id: '2-3', label: '机柜线路测试', type: 'level_2' },
-      //     ],
-      //   },
-      //   {
-      //     id: 3,
-      //     label: '设备调试',
-      //     type: 'level_1',
-      //     children: [{ id: '3-1', label: '设备调试', type: 'level_2' }],
-      //   },
-      //   { id: 4, label: '结束', type: 'level_1' },
-      // ],
+      nodesBox: { width: '1205', height: '1008' },
+      nodeSource: null,
     };
   },
   computed: {
@@ -107,20 +81,9 @@ export default {
       step: this.gridSize,
     });
 
-    this.bpmData = treeNodeAddProp(dataTree, { childrenProp: 'children', initPos: [] }, (node, pos) => {
-      let newNode = {
-        id: node.id,
-        label: node.label,
-        pos: pos,
-        type: 'level_' + pos.length,
-        className: 'level_' + pos.length,
-      };
-      node.prop = newNode;
-      return node;
-    });
     this.$nextTick(() => {
-      let nodeBox = document.getElementById('nodes').getBoundingClientRect();
-      this.nodesBox = { width: nodeBox.width + 40, height: nodeBox.height + 60 };
+      // let nodeBox = document.getElementById('nodes').getBoundingClientRect();
+      // this.nodesBox = { width: nodeBox.width + 40, height: nodeBox.height + 60 };
     });
   },
 
@@ -193,6 +156,10 @@ export default {
 .bpm-visual {
   width: 100%;
   height: 100%;
+
+  foreignObject {
+    overflow: visible;
+  }
 }
 
 .bpm-visual .dragging {
